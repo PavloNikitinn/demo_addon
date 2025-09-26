@@ -25,6 +25,19 @@ rex_sql_table::get(rex::getTable('demo_addon'))
     ->ensureColumn(new rex_sql_column('status', 'tinyint(1)', true, 1))
     ->ensure();
 
+    rex_sql_table::get(rex::getTable('demo_addon_theme'))
+    ->ensurePrimaryIdColumn()
+    ->ensureColumn(new rex_sql_column('title', 'varchar(255)', false))
+    ->ensureColumn(new rex_sql_column('primary_color', 'varchar(7)', false))
+    ->ensureColumn(new rex_sql_column('primary_color_text', 'varchar(7)', true))
+    ->ensureColumn(new rex_sql_column('secondary_color', 'varchar(7)', false))
+    ->ensureColumn(new rex_sql_column('secondary_color_text', 'varchar(7)', true))
+    ->ensureColumn(new rex_sql_column('accent_color', 'varchar(7)', false))
+    ->ensureColumn(new rex_sql_column('accent_color_text', 'varchar(7)', true))
+    ->ensureColumn(new rex_sql_column('status', 'tinyint(1)', true, 1))
+    ->ensureColumn(new rex_sql_column('createdate', 'datetime'))
+    ->ensureColumn(new rex_sql_column('updatedate', 'datetime'))
+    ->ensure();
 // Bei AddOn-Installation/Reinstallation folgende Beispiel-Daten importieren
 $demodata = [
     ['id' => 1, 'anrede' => 1, 'vorname' => 'Max', 'name' => 'Muster', 'strasse' => 'Schönstr. 1', 'plz' => '81333', 'ort' => 'München', 'birthdate' => '1966-01-01', 'status' => 1],

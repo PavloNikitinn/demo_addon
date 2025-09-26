@@ -49,6 +49,11 @@ page:
           title: "translate:config_rex_config_form"
         classic_form:
           title: "translate:config_classic_form"
+    themes:
+      title: Themes Farben
+      icon: rex-icon fa-paint-brush # Icon von Font Awesome
+      subpages: # Weitere Subpages der Seite config
+        farben: { title: "Farben" }
     tables:
       title: "translate:tables"
       icon: rex-icon fa-table
