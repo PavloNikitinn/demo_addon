@@ -22,6 +22,12 @@ $addon->setProperty('author', 'Friends Of REDAXO');
 if (rex::isBackend() && is_object(rex::getUser())) {
     rex_perm::register('demo_addon[]');
     rex_perm::register('demo_addon[config]');
+    rex_view::addCssFile($this->getAssetsUrl('css/output.css'));
+    echo $this->getAssetsUrl('output.css');
+    rex_view::addJsFile($this->getAssetsUrl('js/alpine.js'));
+    rex_view::addJsFile($this->getAssetsUrl('js/alpine2.js'));
+    rex_view::addJsFile($this->getAssetsUrl('js/theme.js'));
+
 }
 
 // Assets werden bei der Installation des AddOns in den assets-Ordner kopiert und stehen damit
@@ -63,4 +69,149 @@ if (rex::isBackend() && rex::getUser()) {
 if (rex::isFrontend()) {
     // Include der AddOn-Eigenen Dateien für das Frontend
     //$addon->includeFile('functions/frontend_functions.php');
+}
+class MeinButton implements FriendsOfRedaxo\QuickNavigation\Button\ButtonInterface
+{
+    public function get(): string
+    {
+        // Logik für die Schaltfläche
+        $html = <<<HTML
+<div id="theme-button-wrapper" class="relative inline-block text-left">
+    <div>
+        <button id="theme-toggle-button" type="button"
+            class="btn btn-default dropdown-toggle" onclick="test()">
+            <span>Theme: <span id="theme-label"></span></span>
+            <svg id="theme-chevron" class="-mr-1 ml-2 h-5 w-5 transition-transform duration-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd"
+                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                    clip-rule="evenodd" />
+            </svg>
+        </button>
+    </div>
+
+    <div id="theme-menu" class="origin-top-right absolute quick-navigation-menu dropdown-menu dropdown-menu-right">
+        <div class="py-1 bg-">
+            <button class="theme-option px-4 py-2 block w-full text-left hover:bg-gray-100" data-theme="light">Helles Design</button>
+            <button class="theme-option px-4 py-2  block w-full text-left hover:bg-gray-100" data-theme="dark">Dunkles Design</button>
+            <button class="theme-option px-4 py-2  block w-full text-left hover:bg-gray-100" data-theme="custom">Custom Design (Grün)</button>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("Theme script loaded");
+  const wrapper = document.getElementById("theme-button-wrapper");
+  console.log(wrapper);
+
+  const toggleButton = document.getElementById("theme-toggle-button");
+  const menu = document.getElementById("theme-menu");
+  const chevron = document.getElementById("theme-chevron");
+  const label = document.getElementById("theme-label");
+
+  // Initiales Theme aus Cookie oder default
+  let theme =
+    document.cookie.replace(
+      /(?:(?:^|.*;\s*)theme\s*=\s*([^;]*).*$)|^.*$/,
+      "$1"
+    ) || "light";
+  document.documentElement.className = theme;
+  if (label) label.textContent = theme;
+
+  // Dropdown toggle
+  toggleButton.addEventListener("click", (e) => {
+    e.stopPropagation();
+    menu.classList.toggle("open");
+    chevron.classList.toggle("rotate-180");
+    wrapper.classList.add("relative");
+  });
+
+  // Klick außerhalb
+  document.addEventListener("click", () => {
+    menu.classList.remove("open");
+    chevron.classList.remove("rotate-180");
+  });
+
+  // Theme Auswahl
+  wrapper.querySelectorAll(".theme-option").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      theme = btn.dataset.theme;
+      document.documentElement.className = theme;
+      document.cookie = "theme=" + theme + "; path=/; max-age=31536000";
+      if (label) label.textContent = theme;
+      menu.classList.remove("open");
+      chevron.classList.remove("rotate-180");
+    });
+  });
+    console.log("moin");
+});
+
+var listenerSet = false;
+var open = false;
+function test(){
+    const wrapper = document.getElementById("theme-button-wrapper");
+
+    console.log("moin");
+    console.log(listenerSet);
+    if(open) {
+        console.log("closing");
+        wrapper.classList.remove("open");
+        open = false;
+        return;
+    }
+    // if theme-menu is hidden, show it
+    const menu = document.getElementById("theme-menu");
+    menu.classList.toggle("open");
+    const chevron = document.getElementById("theme-chevron");
+    chevron.classList.toggle("rotate-180");
+    console.log(menu);
+    open = true;
+
+    //theme selector listeners
+    if(listenerSet) return;
+    wrapper.classList.add("open");
+    wrapper.querySelectorAll(".theme-option").forEach((btn) => {
+        btn.addEventListener("click", () => {
+            const theme = btn.dataset.theme;
+            document.documentElement.className = theme;
+            document.cookie = "theme=" + theme + "; path=/; max-age=31536000";
+            const label = document.getElementById("theme-label");
+            if (label) label.textContent = theme;
+            menu.classList.add("");
+            wrapper.classList.remove("open");
+            chevron.classList.remove("rotate-180");
+            open = false;
+        });
+    });
+    //add listener when clicked outside
+    //
+
+}
+</script>
+HTML;
+        return $html;
+    }
+}
+use FriendsOfRedaxo\QuickNavigation\Button\ButtonRegistry;
+
+ButtonRegistry::registerButton(new MeinButton(), 1);
+
+
+// add Files to Backend
+if (rex::isBackend() && rex::getUser()) {
+    // add CSS File to backend
+    
+
+}
+if (rex::isBackend() && rex::getUser()) {
+    rex_extension::register('PAGES_PREPARED', function ($ep) {
+        $addon = rex_addon::get('demo_addon');
+        $page = $addon->getProperty('page');
+        $page['subpages']['theme-config'] = [
+            'title' => 'Theme-Farben',
+            'icon' => 'rex-icon fa-paint-brush',
+        ];
+        $addon->setProperty('page', $page);
+    });
 }
