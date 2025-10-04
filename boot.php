@@ -169,6 +169,8 @@ function test(){
 
     console.log("moin");
     console.log(listenerSet);
+    const chevron = document.getElementById("theme-chevron");
+    chevron.classList.toggle("rotate-180");
     if(open) {
         console.log("closing");
         wrapper.classList.remove("open");
@@ -178,8 +180,7 @@ function test(){
     // if theme-menu is hidden, show it
     const menu = document.getElementById("theme-menu");
     menu.classList.toggle("open");
-    const chevron = document.getElementById("theme-chevron");
-    chevron.classList.toggle("rotate-180");
+    
     console.log(menu);
     open = true;
 
