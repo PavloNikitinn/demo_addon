@@ -145,6 +145,65 @@ https://redaxo.org/doku/master/addon-assets
       });
     }
   });
+
+  $(document).on("rex:ready", function () {
+    // Code, der bei jedem Laden des Containers ausgeführt werden soll
+    console.log("Theme script loaded");
+    const wrapper = document.getElementById("theme-button-wrapper");
+    console.log(wrapper);
+
+    const toggleButton = document.getElementById("theme-toggle-button");
+    console.log(toggleButton);
+    const menu = document.getElementById("theme-menu");
+    const chevron = document.getElementById("theme-chevron");
+    const label = document.getElementById("theme-label");
+
+    // Initiales Theme aus Cookie oder default
+    let theme =
+      document.cookie.replace(
+        /(?:(?:^|.*;\s*)theme\s*=\s*([^;]*).*$)|^.*$/,
+        "$1"
+      ) || "light";
+    document.documentElement.className = theme;
+    if (label) label.textContent = theme;
+
+    // Dropdown toggle
+    toggleButton.addEventListener("click", (e) => {
+      e.stopPropagation();
+      menu.classList.toggle("open");
+      chevron.classList.toggle("rotate-180");
+      wrapper.classList.add("relative");
+    });
+
+    // Klick außerhalb
+    document.addEventListener("click", () => {
+      menu.classList.remove("open");
+      chevron.classList.remove("rotate-180");
+    });
+
+    // Theme Auswahl
+    wrapper.querySelectorAll(".theme-option").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        theme = btn.dataset.theme;
+        document.documentElement.className = theme;
+        document.cookie = "theme=" + theme + "; path=/; max-age=31536000";
+        console.log("Theme set to:", theme);
+        if (label) label.textContent = theme;
+        menu.classList.remove("open");
+        chevron.classList.remove("rotate-180");
+        //find the :root --primary --secondary --accent colors and set them as css variables
+        const rootStyles = getComputedStyle(document.documentElement);
+        console.log(rootStyles);
+        const primary = rootStyles.getPropertyValue("--primary");
+        const secondary = rootStyles.getPropertyValue("--secondary");
+        const accent = rootStyles.getPropertyValue("--accent");
+        console.log("Primary: " + primary);
+        console.log("Secondary: " + secondary);
+        console.log("Accent: " + accent);
+      });
+    });
+    console.log("moin");
+  });
 })(jQuery);
 
 document.addEventListener("DOMContentLoaded", function () {});

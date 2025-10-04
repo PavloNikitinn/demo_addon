@@ -23,10 +23,10 @@ if (rex::isBackend() && is_object(rex::getUser())) {
     rex_perm::register('demo_addon[]');
     rex_perm::register('demo_addon[config]');
     rex_view::addCssFile($this->getAssetsUrl('css/output.css'));
-    echo $this->getAssetsUrl('output.css');
     rex_view::addJsFile($this->getAssetsUrl('js/alpine.js'));
     rex_view::addJsFile($this->getAssetsUrl('js/alpine2.js'));
     rex_view::addJsFile($this->getAssetsUrl('js/theme.js'));
+    getStyles();
 
 }
 
@@ -70,8 +70,55 @@ if (rex::isFrontend()) {
     // Include der AddOn-Eigenen Dateien für das Frontend
     //$addon->includeFile('functions/frontend_functions.php');
 }
+
+function getStyles(){
+    echo "<style>";
+    $sql = rex_sql::factory();
+    $sql->setQuery('SELECT title, primary_color, secondary_color, accent_color FROM ' . rex::getTable('demo_addon_theme') . ' WHERE status=1 ORDER BY title ASC');
+    $themes = [];
+    for ($i = 0; $i < $sql->getRows(); $i++) {
+        $title = strtolower(preg_replace('/\s+/', '-', $sql->getValue('title')));
+        $themes[$title] = [
+            'primary' => $sql->getValue('primary_color'),
+            'secondary' => $sql->getValue('secondary_color'),
+            'accent' => $sql->getValue('accent_color')
+        ];
+        //debug
+        $sql->next();
+    }
+    ?>
+
+
+<?php foreach ($themes as $class => $colors): ?>.<?=$class ?> {
+--primary: <?=htmlspecialchars($colors['primary']) ?>;
+--secondary: <?=htmlspecialchars($colors['secondary']) ?>;
+--accent: <?=htmlspecialchars($colors['accent']) ?>;
+}
+
+<?php endforeach;
+    echo "</style>";
+    }
 class MeinButton implements FriendsOfRedaxo\QuickNavigation\Button\ButtonInterface
 {
+    public $themes;
+    private function registerThemes()
+    {
+        $themes = [];
+        $sql = rex_sql::factory();
+        $sql->setQuery('SELECT title, primary_color, secondary_color, accent_color FROM ' . rex::getTable('demo_addon_theme') . ' WHERE status = 1 ORDER BY title ASC');
+        // Hier können Sie Ihre Themen registrieren
+        for ($i = 0; $i < $sql->getRows(); $i++) {
+            $themes[] = [
+                'title' => $sql->getValue('title'),
+                'primary_color' => $sql->getValue('primary_color'),
+                'secondary_color' => $sql->getValue('secondary_color'),
+                'accent_color' => $sql->getValue('accent_color'),
+            ];
+            $sql->next();
+        }
+        return $themes;
+    }
+
     public function get(): string
     {
         // Logik für die Schaltfläche
@@ -95,56 +142,24 @@ class MeinButton implements FriendsOfRedaxo\QuickNavigation\Button\ButtonInterfa
             <button class="theme-option px-4 py-2 block w-full text-left hover:bg-gray-100" data-theme="light">Helles Design</button>
             <button class="theme-option px-4 py-2  block w-full text-left hover:bg-gray-100" data-theme="dark">Dunkles Design</button>
             <button class="theme-option px-4 py-2  block w-full text-left hover:bg-gray-100" data-theme="custom">Custom Design (Grün)</button>
+HTML;
+$themes = $this->registerThemes();
+foreach ($themes as $theme) {
+    $themeClass = strtolower(preg_replace('/\s+/', '-', $theme['title']));
+    $html .= <<<HTML
+            <button class="theme-option px-4 py-2  block w-full text-left hover:bg-gray-100" data-theme="{$themeClass}">{$theme['title']}</button>
+HTML;
+}
+$html .= <<<HTML
         </div>
+
+
     </div>
 </div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("Theme script loaded");
-  const wrapper = document.getElementById("theme-button-wrapper");
-  console.log(wrapper);
 
-  const toggleButton = document.getElementById("theme-toggle-button");
-  const menu = document.getElementById("theme-menu");
-  const chevron = document.getElementById("theme-chevron");
-  const label = document.getElementById("theme-label");
-
-  // Initiales Theme aus Cookie oder default
-  let theme =
-    document.cookie.replace(
-      /(?:(?:^|.*;\s*)theme\s*=\s*([^;]*).*$)|^.*$/,
-      "$1"
-    ) || "light";
-  document.documentElement.className = theme;
-  if (label) label.textContent = theme;
-
-  // Dropdown toggle
-  toggleButton.addEventListener("click", (e) => {
-    e.stopPropagation();
-    menu.classList.toggle("open");
-    chevron.classList.toggle("rotate-180");
-    wrapper.classList.add("relative");
-  });
-
-  // Klick außerhalb
-  document.addEventListener("click", () => {
-    menu.classList.remove("open");
-    chevron.classList.remove("rotate-180");
-  });
-
-  // Theme Auswahl
-  wrapper.querySelectorAll(".theme-option").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      theme = btn.dataset.theme;
-      document.documentElement.className = theme;
-      document.cookie = "theme=" + theme + "; path=/; max-age=31536000";
-      if (label) label.textContent = theme;
-      menu.classList.remove("open");
-      chevron.classList.remove("rotate-180");
-    });
-  });
-    console.log("moin");
 });
 
 var listenerSet = false;
@@ -182,6 +197,7 @@ function test(){
             wrapper.classList.remove("open");
             chevron.classList.remove("rotate-180");
             open = false;
+
         });
     });
     //add listener when clicked outside
@@ -192,18 +208,13 @@ function test(){
 HTML;
         return $html;
     }
+
+
 }
 use FriendsOfRedaxo\QuickNavigation\Button\ButtonRegistry;
 
 ButtonRegistry::registerButton(new MeinButton(), 1);
 
-
-// add Files to Backend
-if (rex::isBackend() && rex::getUser()) {
-    // add CSS File to backend
-    
-
-}
 if (rex::isBackend() && rex::getUser()) {
     rex_extension::register('PAGES_PREPARED', function ($ep) {
         $addon = rex_addon::get('demo_addon');
