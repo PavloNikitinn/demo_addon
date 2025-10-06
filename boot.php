@@ -143,6 +143,7 @@ class MeinButton implements FriendsOfRedaxo\QuickNavigation\Button\ButtonInterfa
             <button class="theme-option px-4 py-2  block w-full text-left hover:bg-gray-100" data-theme="dark">Dunkles Design</button>
             <button class="theme-option px-4 py-2  block w-full text-left hover:bg-gray-100" data-theme="custom">Custom Design (Grün)</button>
 HTML;
+
 $themes = $this->registerThemes();
 foreach ($themes as $theme) {
     $themeClass = strtolower(preg_replace('/\s+/', '-', $theme['title']));
@@ -158,12 +159,9 @@ $html .= <<<HTML
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-
-});
 
 var listenerSet = false;
-var open = false;
+var themeCollapseIsOpen = false;
 function test(){
     const wrapper = document.getElementById("theme-button-wrapper");
 
@@ -171,7 +169,7 @@ function test(){
     console.log(listenerSet);
     const chevron = document.getElementById("theme-chevron");
     chevron.classList.toggle("rotate-180");
-    if(open) {
+    if(themeCollapseIsOpen) {
         console.log("closing");
         wrapper.classList.remove("open");
         open = false;
@@ -182,7 +180,7 @@ function test(){
     menu.classList.toggle("open");
     
     console.log(menu);
-    open = true;
+    themeCollapseIsOpen = true;
 
     //theme selector listeners
     if(listenerSet) return;
@@ -197,7 +195,7 @@ function test(){
             menu.classList.add("");
             wrapper.classList.remove("open");
             chevron.classList.remove("rotate-180");
-            open = false;
+            themeCollapseIsOpen = false;
 
         });
     });
@@ -207,7 +205,8 @@ function test(){
 }
 </script>
 HTML;
-        return $html;
+//$html = "<button>test</button>"
+        return $html ;
     }
 
 

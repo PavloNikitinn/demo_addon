@@ -20,6 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Dropdown toggle
   toggleButton.addEventListener("click", (e) => {
     e.stopPropagation();
+    console.log("Toggle theme menu");
     menu.classList.toggle("");
     chevron.classList.toggle("rotate-180");
     wrapper.classList.toggle("show");
@@ -29,6 +30,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Klick außerhalb
   document.addEventListener("click", () => {
     menu.classList.add("");
+    console.log("Toggle theme menu close");
     chevron.classList.remove("rotate-180");
   });
 
@@ -36,6 +38,8 @@ document.addEventListener("DOMContentLoaded", () => {
   wrapper.querySelectorAll(".theme-option").forEach((btn) => {
     btn.addEventListener("click", () => {
       theme = btn.dataset.theme;
+      console.log("Toggle theme to:", theme);
+
       document.documentElement.className = theme;
       document.cookie = "theme=" + theme + "; path=/; max-age=31536000";
       if (label) label.textContent = theme;
